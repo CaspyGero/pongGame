@@ -74,8 +74,8 @@ def gamePong(width, height, speed):
                 try:
                     data, host = playerSocket.recvfrom(1024)
                 except socket.timeout:
-                    data = "None"
-                    pass
+                    print("Timeout waiting host data")
+                    data = b"None"
                 if(data.decode() == "True"):
                     start = True
             else:
@@ -147,22 +147,24 @@ def gamePong(width, height, speed):
                     try:
                         data, host = playerSocket.recvfrom(1024)
                     except socket.timeout:
-                        pass
+                        print("Timeout waiting client data")
+                        data = b"None"
                 else:
                     #Try por si no llegan datos
                     try:
                         data, host = playerSocket.recvfrom(1024)
                     except socket.timeout:
-                        pass
+                        print("Timeout waiting host data")
+                        data = b"None"
                     string = f"playerPosition={positionPlayer2.y}, playerDirection={directionPlayer2}"
                     playerSocket.sendto(string.encode(), host)
                 data = data.decode().split(", ")
                 if len(data) == 2:
                     if data[0].startswith("playerPosition="):
                         if hostOrClient == "host":
-                            positionPlayer2.y = int(data[0].split("=")[1])
+                            positionPlayer2.y = float(data[0].split("=")[1])
                         else:
-                            positionPlayer1.y = int(data[0].split("=")[1])
+                            positionPlayer1.y = float(data[0].split("=")[1])
                     if data[1].startswith("playerDirection="):
                         if hostOrClient == "host":
                             directionPlayer2 = int(data[1].split("=")[1])
