@@ -2,6 +2,7 @@ def gamePong(width, height, speed):
     import pygame
     from os import path
     global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+    start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None #So when they start sending data, they have something to send
     pygame.init()
     pygame.display.set_caption("Pong")
     logoPong = pygame.image.load(path.dirname(__file__) + "/logoPong.png")
@@ -204,11 +205,11 @@ class online:
             print(clientSocket)
             if clientData[0] == expectedIP:
                 print("Connected by:", clientData)
-                clientSocket.send(b"Confirmation message!")
+                clientSocket.send(b"Connection confirmation!")
                 hostWaiting = False
         hostSocket.send(f"width={width}, height={height}, speed={speed}".encode())
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
-        dataThread = threading.Thread(target=online.hostSendData, args=(hostSocket, clientSocket))
+        dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
         gameThread.start()
         sleep(1)
         while gameThread.is_alive():
@@ -217,7 +218,7 @@ class online:
         hostSocket.close()
         print("End of connection!")
 
-    def hostSendData(hostSocket, clientSocket):
+    def hostSendData(clientSocket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         clientSocket.send(start)
         clientSocket.send(running)
@@ -237,10 +238,7 @@ class online:
         from time import sleep
         clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         clientIP = socket.gethostbyname(socket.gethostname()) 
-        clientPort = 50574 #Standar port
-        clientData = clientIP, clientPort
-        clientSocket.bind(clientData)
-        print(f"Client ip is: {clientIP}\nClient port is: {clientPort}")
+        print(f"Client ip is: {clientIP}")
         hostIP = input("Enter the host's ip: ")
         hostPort = 50574 #Standar port
         hostData = hostIP, hostPort
@@ -263,7 +261,7 @@ class online:
                             speed = int(data[2].split("=")[1])
                 clientWaiting = False
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
-        dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket))
+        dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
         gameThread.start()
         sleep(1)
         while gameThread.is_alive():
@@ -297,46 +295,3 @@ while __name__ == "__main__":
             online.client()
     elif isOnline == "n":
         launcher()
-
-
-
-
-
-
-
-
-"""
-#TODO: DELETE
-#Send and recieve variables
-if isOnline == "s":
-    if hostOrClient == "host":
-        string = f"playerPosition={positionPlayer1.y}, playerDirection={directionPlayer1}"
-        playerSocket.sendto(string.encode(), client)
-        #Try por si no llegan datos
-        try:
-            data, host = playerSocket.recvfrom(1024)
-        except socket.timeout:
-            print("Timeout waiting client data")
-            data = b"None"
-    else:
-        #Try por si no llegan datos
-        try:
-            data, host = playerSocket.recvfrom(1024)
-        except socket.timeout:
-            print("Timeout waiting host data")
-            data = b"None"
-        string = f"playerPosition={positionPlayer2.y}, playerDirection={directionPlayer2}"
-        playerSocket.sendto(string.encode(), host)
-    data = data.decode().split(", ")
-    if len(data) == 2:
-        if data[0].startswith("playerPosition="):
-            if hostOrClient == "host":
-                positionPlayer2.y = float(data[0].split("=")[1])
-            else:
-                positionPlayer1.y = float(data[0].split("=")[1])
-        if data[1].startswith("playerDirection="):
-            if hostOrClient == "host":
-                directionPlayer2 = int(data[1].split("=")[1])
-            else:
-                directionPlayer1 = int(data[1].split("=")[1])
-"""
