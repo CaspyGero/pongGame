@@ -2,7 +2,6 @@ def gamePong(width, height, speed):
     import pygame
     from os import path
     global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-    start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None #So when they start sending data, they have something to send
     pygame.init()
     pygame.display.set_caption("Pong")
     logoPong = pygame.image.load(path.dirname(__file__) + "/logoPong.png")
@@ -199,38 +198,40 @@ class online:
         print(f"Host ip is: {hostIP}\nHost port is: {hostPort}")
         hostSocket.listen(5)
         hostWaiting = True
-        expectedIP = input("Enter the expected ip: ")
         while hostWaiting:
+            expectedIP = input("Enter the expected ip: ")
             clientSocket, clientData = hostSocket.accept()
-            print(clientSocket)
+            print(clientData[0] + " is trying to connect.\n")
             if clientData[0] == expectedIP:
-                print("Connected by:", clientData)
+                print("Connected by: " + clientData[0])
                 clientSocket.send(b"Connection confirmation!")
                 hostWaiting = False
-        hostSocket.send(f"width={width}, height={height}, speed={speed}".encode())
+        clientSocket.send(f"width={width}, height={height}, speed={speed}".encode())
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
+        #So when they start sending data, they have something to send
+        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None
         gameThread.start()
-        sleep(1)
         while gameThread.is_alive():
             dataThread.start()
             dataThread.join()
         hostSocket.close()
         print("End of connection!")
 
-    def hostSendData(clientSocket):
+    def hostSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        clientSocket.send(start)
-        clientSocket.send(running)
-        clientSocket.send(points)
-        clientSocket.send(positionPlayer1)
-        clientSocket.send(directionPlayer1)
-        clientSocket.send(positionBall)
-        clientSocket.send(directionBall)
-        start = clientSocket.recv(1024).decode('utf-8')
-        running = clientSocket.recv(1024).decode('utf-8')
-        positionPlayer2 = clientSocket.recv(1024).decode('utf-8')
-        directionPlayer2 = clientSocket.recv(1024).decode('utf-8')
+        socket.send(start)
+        socket.send(running)
+        socket.send(points)
+        socket.send(positionPlayer1)
+        socket.send(directionPlayer1)
+        socket.send(positionBall)
+        socket.send(directionBall)
+        start = socket.recv(1024).decode('utf-8')
+        running = socket.recv(1024).decode('utf-8')
+        positionPlayer2 = socket.recv(1024).decode('utf-8')
+        directionPlayer2 = socket.recv(1024).decode('utf-8')
 
     def client():
         import threading
@@ -251,7 +252,7 @@ class online:
                 width, height, speed = None, None, None
                 while width == None or height == None or speed == None:
                     data = clientSocket.recv(1024).decode("utf-8")
-                    data = data.decode().split(", ")
+                    data = data.split(", ")
                     if len(data) == 3:
                         if data[0].startswith("width="):
                             width = int(data[0].split("=")[1])
@@ -262,36 +263,38 @@ class online:
                 clientWaiting = False
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
+        #So when they start sending data, they have something to send
+        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None #So when they start sending data, they have something to send
         gameThread.start()
-        sleep(1)
         while gameThread.is_alive():
             dataThread.start()
             dataThread.join()
         clientSocket.close()
         print("End of connection!")
 
-    def clientSendData(clientSocket):
+    def clientSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        start = clientSocket.recv(1024).decode('utf-8')
-        running = clientSocket.recv(1024).decode('utf-8')
-        points = clientSocket.recv(1024).decode('utf-8')
-        positionPlayer1 = clientSocket.recv(1024).decode('utf-8')
-        directionPlayer1 = clientSocket.recv(1024).decode('utf-8')
-        positionBall = clientSocket.recv(1024).decode('utf-8')
-        directionBall = clientSocket.recv(1024).decode('utf-8')
-        clientSocket.send(start)
-        clientSocket.send(running)
-        clientSocket.send(positionPlayer2)
-        clientSocket.send(directionPlayer2)
+        start = socket.recv(1024).decode('utf-8')
+        running = socket.recv(1024).decode('utf-8')
+        points = socket.recv(1024).decode('utf-8')
+        positionPlayer1 = socket.recv(1024).decode('utf-8')
+        directionPlayer1 = socket.recv(1024).decode('utf-8')
+        positionBall = socket.recv(1024).decode('utf-8')
+        directionBall = socket.recv(1024).decode('utf-8')
+        socket.send(start)
+        socket.send(running)
+        socket.send(positionPlayer2)
+        socket.send(directionPlayer2)
 
 stringToBoolean ={"f": False, "t": True}
 while __name__ == "__main__":
     isOnline = stringToBoolean[input("Online (T/f)? ").lower()]
     if isOnline == True:
-        hostOrClient = input("Host or client? ").lower()
-        if hostOrClient == "host":
+        hostOrClient = input("Host or client (H/c)? ").lower()
+        if hostOrClient == "h":
             launcher()
-        elif hostOrClient == "client":
+        elif hostOrClient == "c":
             online.client()
     elif isOnline == "n":
         launcher()
