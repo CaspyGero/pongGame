@@ -8,15 +8,14 @@ def gamePong(width, height, speed):
     pygame.display.set_icon(logoPong)
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
-    running = True
-    start = False
     #Define variables
     margin = {"up" : 30, "right" : 20, "down" : 20, "left" : 20}
     directionPlayer1 = speed
     directionPlayer2 = -speed
     directionBall = pygame.Vector2(speed * (3/5), speed * (3/5))
+    positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
+    positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
     positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-    points = {"player1" : 0, "player2" : 0}
     font = pygame.font.Font(None, 50)
     pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
     startText = font.render("Press space to start", 1, "white")
@@ -185,10 +184,27 @@ def launcher():
     root.mainloop()
 
 class online:
+    def baseVariables():
+        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        from pygame import Vector2
+        #Standart values
+        speed = 5
+        margin = {"left":5, "right": 5}
+        height, width = 500, 500
+        #Base values
+        start = False
+        running = True
+        points = {"player1" : 0, "player2" : 0}
+        directionPlayer1 = speed
+        directionPlayer2 = -speed
+        directionBall = Vector2(speed * (3/5), speed * (3/5))
+        positionPlayer1 = Vector2(margin["left"] + 25, height / 2)
+        positionPlayer2 = Vector2(width - margin["right"] - 16 - 25, height/ 2)
+        positionBall = Vector2(width / 2, height / 2)
+
     def host(width, height, speed):
         import threading
         import socket
-        from time import sleep
         hostSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         hostIP = socket.gethostbyname(socket.gethostname())
         hostPort = 50574
@@ -209,9 +225,7 @@ class online:
         clientSocket.send(f"width={width}, height={height}, speed={speed}".encode())
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
-        #So when they start sending data, they have something to send
-        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None
+        online.baseVariables()
         gameThread.start()
         while gameThread.is_alive():
             dataThread.start()
@@ -221,22 +235,22 @@ class online:
 
     def hostSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        socket.send(start.encode())
-        socket.send(running.encode())
-        socket.send(points.encode())
-        socket.send(positionPlayer1.encode())
-        socket.send(directionPlayer1.encode())
-        socket.send(positionBall.encode())
-        socket.send(directionBall.encode())
-        start = socket.recv(1024).decode('utf-8')
-        running = socket.recv(1024).decode('utf-8')
-        positionPlayer2 = socket.recv(1024).decode('utf-8')
-        directionPlayer2 = socket.recv(1024).decode('utf-8')
+        socket.send(str(start).encode())
+        socket.send(str(running).encode())
+        socket.send((points["player1"] + "," + points["player2"]).encode())
+        socket.send(str(positionPlayer1.y).encode())
+        socket.send(str(directionPlayer1.y).encode())
+        #FIXME: BALL NEEDS X AND Y
+        socket.send((positionBall.x + "," + positionBall.y).encode())
+        socket.send(str(directionBall.x + "," + directionBall.y).encode())
+        start = socket.recv(1024).decode('utf-8') == "True"
+        running = socket.recv(1024).decode('utf-8') == "True"
+        positionPlayer2.y = int(socket.recv(1024).decode('utf-8'))
+        directionPlayer2.y = int(socket.recv(1024).decode('utf-8'))
 
     def client():
         import threading
         import socket
-        from time import sleep
         clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         clientIP = socket.gethostbyname(socket.gethostname()) 
         print(f"Client ip is: {clientIP}")
@@ -263,9 +277,7 @@ class online:
                 clientWaiting = False
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
-        #So when they start sending data, they have something to send
-        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall = None, None, None, None, None, None, None, None, None #So when they start sending data, they have something to send
+        online.baseVariables()
         gameThread.start()
         while gameThread.is_alive():
             dataThread.start()
@@ -275,17 +287,26 @@ class online:
 
     def clientSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        start = socket.recv(1024).decode('utf-8')
-        running = socket.recv(1024).decode('utf-8')
-        points = socket.recv(1024).decode('utf-8')
-        positionPlayer1 = socket.recv(1024).decode('utf-8')
-        directionPlayer1 = socket.recv(1024).decode('utf-8')
-        positionBall = socket.recv(1024).decode('utf-8')
-        directionBall = socket.recv(1024).decode('utf-8')
-        socket.send(start.encode())
-        socket.send(running.encode())
-        socket.send(positionPlayer2.encode())
-        socket.send(directionPlayer2.encode())
+        start = socket.recv(1024).decode('utf-8') == "True"
+        running = socket.recv(1024).decode('utf-8') == "True"
+        temporalPoints = socket.recv(1024).decode('utf-8')
+        temporalPoints = temporalPoints.split(",")
+        points["player1"] = int(temporalPoints[0])
+        points["player1"] = int(temporalPoints[1])
+        positionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
+        directionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
+        temporalPositionBall = socket.recv(1024).decode('utf-8')
+        temporalPositionBall = temporalPositionBall.split(",")
+        positionBall.x = int(temporalPositionBall[0])
+        positionBall.y = int(temporalPositionBall[1])
+        temporalDirectionBall = socket.recv(1024).decode('utf-8')
+        temporalDirectionBall = temporalDirectionBall.split(",")
+        directionBall.x = int(temporalDirectionBall[0])
+        directionBall.y = int(temporalDirectionBall[1])
+        socket.send(str(start).encode())
+        socket.send(str(running).encode())
+        socket.send(str(positionPlayer2.y).encode())
+        socket.send(str(directionPlayer2.y).encode())
 
 stringToBoolean ={"f": False, "t": True}
 while __name__ == "__main__":
