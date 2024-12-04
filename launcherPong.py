@@ -221,13 +221,13 @@ class online:
 
     def hostSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        socket.send(start)
-        socket.send(running)
-        socket.send(points)
-        socket.send(positionPlayer1)
-        socket.send(directionPlayer1)
-        socket.send(positionBall)
-        socket.send(directionBall)
+        socket.send(start.encode())
+        socket.send(running.encode())
+        socket.send(points.encode())
+        socket.send(positionPlayer1.encode())
+        socket.send(directionPlayer1.encode())
+        socket.send(positionBall.encode())
+        socket.send(directionBall.encode())
         start = socket.recv(1024).decode('utf-8')
         running = socket.recv(1024).decode('utf-8')
         positionPlayer2 = socket.recv(1024).decode('utf-8')
@@ -282,10 +282,10 @@ class online:
         directionPlayer1 = socket.recv(1024).decode('utf-8')
         positionBall = socket.recv(1024).decode('utf-8')
         directionBall = socket.recv(1024).decode('utf-8')
-        socket.send(start)
-        socket.send(running)
-        socket.send(positionPlayer2)
-        socket.send(directionPlayer2)
+        socket.send(start.encode())
+        socket.send(running.encode())
+        socket.send(positionPlayer2.encode())
+        socket.send(directionPlayer2.encode())
 
 stringToBoolean ={"f": False, "t": True}
 while __name__ == "__main__":
