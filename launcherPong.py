@@ -280,7 +280,6 @@ class online:
                             height = int(data[1].split("=")[1])
                         if data[2].startswith("speed="):
                             speed = int(data[2].split("=")[1])
-                print(f"width is {width}, height is {height}, speed is {speed}!")#TODO: DELETE AFTER
                 clientWaiting = False
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
