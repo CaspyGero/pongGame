@@ -242,12 +242,12 @@ class online:
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         socket.send(str(start).encode())
         socket.send(str(running).encode())
-        socket.send((points["player1"] + "," + points["player2"]).encode())
+        socket.send((str(points["player1"]) + "," + str(points["player2"])).encode())
         socket.send(str(positionPlayer1.y).encode())
         socket.send(str(directionPlayer1.y).encode())
         #FIXME: BALL NEEDS X AND Y
-        socket.send((positionBall.x + "," + positionBall.y).encode())
-        socket.send(str(directionBall.x + "," + directionBall.y).encode())
+        socket.send((str(positionBall.x) + "," + str(positionBall.y)).encode())
+        socket.send((str(directionBall.x) + "," + str(directionBall.y)).encode())
         start = socket.recv(1024).decode('utf-8') == "True"
         running = socket.recv(1024).decode('utf-8') == "True"
         positionPlayer2.y = int(socket.recv(1024).decode('utf-8'))
@@ -294,18 +294,15 @@ class online:
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         start = socket.recv(1024).decode('utf-8') == "True"
         running = socket.recv(1024).decode('utf-8') == "True"
-        temporalPoints = socket.recv(1024).decode('utf-8')
-        temporalPoints = temporalPoints.split(",")
+        temporalPoints = socket.recv(1024).decode('utf-8').split(",")
         points["player1"] = int(temporalPoints[0])
         points["player1"] = int(temporalPoints[1])
         positionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
         directionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
-        temporalPositionBall = socket.recv(1024).decode('utf-8')
-        temporalPositionBall = temporalPositionBall.split(",")
+        temporalPositionBall = socket.recv(1024).decode('utf-8').split(",")
         positionBall.x = int(temporalPositionBall[0])
         positionBall.y = int(temporalPositionBall[1])
-        temporalDirectionBall = socket.recv(1024).decode('utf-8')
-        temporalDirectionBall = temporalDirectionBall.split(",")
+        temporalDirectionBall = socket.recv(1024).decode('utf-8').split(",")
         directionBall.x = int(temporalDirectionBall[0])
         directionBall.y = int(temporalDirectionBall[1])
         socket.send(str(start).encode())
