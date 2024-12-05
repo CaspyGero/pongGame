@@ -227,9 +227,7 @@ class online:
             else:
                 print("Connection rejected!")
                 clientSocket.close()
-        print("Sending data")#TODO: DELETE AFTER
         clientSocket.send(f"width={width}, height={height}, speed={speed}".encode())
-        print("Data sent")#TODO: DELETE AFTER
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
         online.baseVariables()
@@ -247,7 +245,6 @@ class online:
         socket.send((str(points["player1"]) + "," + str(points["player2"])).encode())
         socket.send(str(positionPlayer1.y).encode())
         socket.send(str(directionPlayer1).encode())
-        #FIXME: BALL NEEDS X AND Y
         socket.send((str(positionBall.x) + "," + str(positionBall.y)).encode())
         socket.send((str(directionBall.x) + "," + str(directionBall.y)).encode())
         start = socket.recv(1024).decode('utf-8') == "True"
@@ -266,7 +263,7 @@ class online:
         hostData = hostIP, hostPort
         clientSocket.connect(hostData)
         clientWaiting = True
-        #RECIBIR DATOS DE CONFIRMACION
+        #RECIEVE CONFIRMATION DATA
         while clientWaiting:
             data = clientSocket.recv(1024).decode("utf-8")
             if data == "Connection confirmation!":
@@ -283,6 +280,7 @@ class online:
                             height = int(data[1].split("=")[1])
                         if data[2].startswith("speed="):
                             speed = int(data[2].split("=")[1])
+                print(f"width is {width}, height is {height}, speed is {speed}!")#TODO: DELETE AFTER
                 clientWaiting = False
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
