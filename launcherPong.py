@@ -227,7 +227,9 @@ class online:
             else:
                 print("Connection rejected!")
                 clientSocket.close()
+        print("Sending data")#TODO: DELETE AFTER
         clientSocket.send(f"width={width}, height={height}, speed={speed}".encode())
+        print("Data sent")#TODO: DELETE AFTER
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
         online.baseVariables()
@@ -268,8 +270,10 @@ class online:
         while clientWaiting:
             data = clientSocket.recv(1024).decode("utf-8")
             if data == "Connection confirmation!":
+                print(f"Sucessfully connected to {hostIP}!")
                 width, height, speed = None, None, None
                 while width == None or height == None or speed == None:
+                    print("Waiting for data")#TODO: MAYBE DELETE AFTER
                     data = clientSocket.recv(1024).decode("utf-8")
                     data = data.split(", ")
                     if len(data) == 3:
@@ -296,7 +300,7 @@ class online:
         running = socket.recv(1024).decode('utf-8') == "True"
         temporalPoints = socket.recv(1024).decode('utf-8').split(",")
         points["player1"] = int(temporalPoints[0])
-        points["player1"] = int(temporalPoints[1])
+        points["player2"] = int(temporalPoints[1])
         positionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
         directionPlayer1 = int(socket.recv(1024).decode('utf-8'))
         temporalPositionBall = socket.recv(1024).decode('utf-8').split(",")
