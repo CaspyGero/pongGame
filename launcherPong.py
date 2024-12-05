@@ -244,14 +244,14 @@ class online:
         socket.send(str(running).encode())
         socket.send((str(points["player1"]) + "," + str(points["player2"])).encode())
         socket.send(str(positionPlayer1.y).encode())
-        socket.send(str(directionPlayer1.y).encode())
+        socket.send(str(directionPlayer1).encode())
         #FIXME: BALL NEEDS X AND Y
         socket.send((str(positionBall.x) + "," + str(positionBall.y)).encode())
         socket.send((str(directionBall.x) + "," + str(directionBall.y)).encode())
         start = socket.recv(1024).decode('utf-8') == "True"
         running = socket.recv(1024).decode('utf-8') == "True"
         positionPlayer2.y = int(socket.recv(1024).decode('utf-8'))
-        directionPlayer2.y = int(socket.recv(1024).decode('utf-8'))
+        directionPlayer2 = int(socket.recv(1024).decode('utf-8'))
 
     def client():
         import threading
@@ -298,7 +298,7 @@ class online:
         points["player1"] = int(temporalPoints[0])
         points["player1"] = int(temporalPoints[1])
         positionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
-        directionPlayer1.y = int(socket.recv(1024).decode('utf-8'))
+        directionPlayer1 = int(socket.recv(1024).decode('utf-8'))
         temporalPositionBall = socket.recv(1024).decode('utf-8').split(",")
         positionBall.x = int(temporalPositionBall[0])
         positionBall.y = int(temporalPositionBall[1])
@@ -308,7 +308,7 @@ class online:
         socket.send(str(start).encode())
         socket.send(str(running).encode())
         socket.send(str(positionPlayer2.y).encode())
-        socket.send(str(directionPlayer2.y).encode())
+        socket.send(str(directionPlayer2).encode())
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
