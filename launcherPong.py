@@ -145,6 +145,7 @@ def launcher():
     root = tkinter.Tk()
     root.title("Pong launcher")
     root.geometry("300x175+600+300")
+    root.attributes('-topmost', True)
     root.resizable(0,0)
 
     frameMain = tkinter.Frame(root, width=130)
@@ -210,18 +211,22 @@ class online:
         hostPort = 50574
         hostData = hostIP, hostPort
         hostSocket.bind(hostData)
-        print("TCP host up and listening")
+        print("\nTCP host up and listening")
         print(f"Host ip is: {hostIP}\nHost port is: {hostPort}")
-        hostSocket.listen(5)
+        hostSocket.listen(2)
+        print("\nWaiting for a connection...\n")
         hostWaiting = True
         while hostWaiting:
-            expectedIP = input("Enter the expected ip: ")
             clientSocket, clientData = hostSocket.accept()
             print(clientData[0] + " is trying to connect.\n")
-            if clientData[0] == expectedIP:
+            acceptConnection = input("Accept this connection (Y/n)? ").lower()
+            if acceptConnection == "y":
                 print("Connected by: " + clientData[0])
                 clientSocket.send(b"Connection confirmation!")
                 hostWaiting = False
+            else:
+                print("Connection rejected!")
+                clientSocket.close()
         clientSocket.send(f"width={width}, height={height}, speed={speed}".encode())
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
@@ -308,9 +313,9 @@ class online:
         socket.send(str(positionPlayer2.y).encode())
         socket.send(str(directionPlayer2.y).encode())
 
-stringToBoolean ={"f": False, "t": True}
+stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
-    isOnline = stringToBoolean[input("Online (T/f)? ").lower()]
+    isOnline = stringToBoolean[input("Online (Y/n)? ").lower()]
     if isOnline == True:
         hostOrClient = input("Host or client (H/c)? ").lower()
         if hostOrClient == "h":
