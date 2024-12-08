@@ -240,7 +240,7 @@ class online:
 
     def hostSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        socket.send(f"{str(start)},{str(running)},{str(points["player1"])},{str(points["player2"])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
+        socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
         data = socket.recv(1024).decode('utf-8').split(",")
         start = data[0] == "True"
         running = data[1] == "True"
@@ -266,7 +266,6 @@ class online:
                 print(f"Sucessfully connected to {hostIP}!")
                 width, height, speed = None, None, None
                 while width == None or height == None or speed == None:
-                    print("Waiting for data")#TODO: MAYBE DELETE AFTER
                     data = clientSocket.recv(1024).decode("utf-8").split(",")
                     if len(data) == 3:
                         if data[0].startswith("width="):
@@ -304,12 +303,22 @@ class online:
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
+    hasTk = stringToBoolean[input("Is tkinter installer (Y/n)?").lower()]
     isOnline = stringToBoolean[input("Online (Y/n)? ").lower()]
-    if isOnline == True:
-        hostOrClient = input("Host or client (H/c)? ").lower()
-        if hostOrClient == "h":
+    if hasTk:
+        if isOnline:
+            hostOrClient = input("Host or client (H/c)? ").lower()
+            if hostOrClient == "h":
+                launcher()
+            elif hostOrClient == "c":
+                online.client()
+        elif isOnline == "n":
             launcher()
-        elif hostOrClient == "c":
-            online.client()
-    elif isOnline == "n":
-        launcher()
+    else:
+        width = int(input("Enter the width: "))
+        height = int(input("Enter the height: "))
+        speed = int(input("Enter the speed: "))
+        if isOnline:
+            online.host(width, height, speed)
+        else:
+            gamePong(width, height, speed)
