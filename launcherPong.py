@@ -228,25 +228,26 @@ class online:
                 print("Connection rejected!")
                 clientSocket.close()
         clientSocket.send(f"width={width},height={height},speed={speed}".encode())
+        global gameThread
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.hostSendData, args=(clientSocket,))
         online.baseVariables()
         gameThread.start()
-        while gameThread.is_alive():
-            dataThread.start()
-            dataThread.join()
+        dataThread.start()
+        dataThread.join()
         hostSocket.close()
         print("End of connection!")
 
     def hostSendData(socket):
-        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
-        data = socket.recv(1024).decode('utf-8').split(",")
-        start = data[0] == "True"
-        running = data[1] == "True"
-        positionPlayer2.y = int(float(data[2]))
-        directionPlayer2 = int(float(data[3]))
-        print(data) #TODO: REMOVE LATER
+        global gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        while gameThread.is_alive():
+            socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
+            data = socket.recv(1024).decode('utf-8').split(",")
+            start = data[0] == "True"
+            running = data[1] == "True"
+            positionPlayer2.y = int(float(data[2]))
+            directionPlayer2 = int(float(data[3]))
+            print(data) #TODO: REMOVE LATER
 
     def client():
         import threading
@@ -275,31 +276,32 @@ class online:
                         if data[2].startswith("speed="):
                             speed = int(data[2].split("=")[1])
                 clientWaiting = False
+        global gameThread
         gameThread = threading.Thread(target=gamePong, args=(width, height, speed))
         dataThread = threading.Thread(target=online.clientSendData, args=(clientSocket,))
         online.baseVariables()
         gameThread.start()
-        while gameThread.is_alive():
-            dataThread.start()
-            dataThread.join()
+        dataThread.start()
+        dataThread.join()
         clientSocket.close()
         print("End of connection!")
 
     def clientSendData(socket):
-        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        data = socket.recv(1024).decode('utf-8').split(",")
-        start = data[0] == "True"
-        running = data[1] == "True"
-        points["player1"] = int(float(data[2]))
-        points["player2"] = int(float(data[3]))
-        positionPlayer1.y = int(float(data[4]))
-        directionPlayer1 = int(float(data[5]))
-        positionBall.x = int(float(data[6]))
-        positionBall.y = int(float(data[7]))
-        directionBall.x = int(float(data[8]))
-        directionBall.y = int(float(data[9]))
-        socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
-        print(data) #TODO: REMOVE LATER
+        global gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        while gameThread.is_alive():
+            data = socket.recv(1024).decode('utf-8').split(",")
+            start = data[0] == "True"
+            running = data[1] == "True"
+            points["player1"] = int(float(data[2]))
+            points["player2"] = int(float(data[3]))
+            positionPlayer1.y = int(float(data[4]))
+            directionPlayer1 = int(float(data[5]))
+            positionBall.x = int(float(data[6]))
+            positionBall.y = int(float(data[7]))
+            directionBall.x = int(float(data[8]))
+            directionBall.y = int(float(data[9]))
+            socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
+            print(data) #TODO: REMOVE LATER
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
