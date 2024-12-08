@@ -244,8 +244,8 @@ class online:
         data = socket.recv(1024).decode('utf-8').split(",")
         start = data[0] == "True"
         running = data[1] == "True"
-        positionPlayer2.y = int(data[2])
-        directionPlayer2 = int(data[3])
+        positionPlayer2.y = int(float(data[2]))
+        directionPlayer2 = int(float(data[3]))
         print(data) #TODO: REMOVE LATER
 
     def client():
@@ -292,10 +292,10 @@ class online:
         running = data[1] == "True"
         points["player1"] = int(data[2])
         points["player2"] = int(data[3])
-        positionPlayer1.y = int(data[4])
+        positionPlayer1.y = int(float(data[4]))
         directionPlayer1 = int(data[5])
-        positionBall.x = int(data[6])
-        positionBall.y = int(data[7])
+        positionBall.x = int(float(data[6]))
+        positionBall.y = int(float(data[7]))
         directionBall.x = int(data[8])
         directionBall.y = int(data[9])
         socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
@@ -303,7 +303,7 @@ class online:
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
-    hasTk = stringToBoolean[input("Is tkinter installer (Y/n)?").lower()]
+    hasTk = stringToBoolean[input("Is tkinter installer (Y/n)? ").lower()]
     isOnline = stringToBoolean[input("Online (Y/n)? ").lower()]
     if hasTk:
         if isOnline:
