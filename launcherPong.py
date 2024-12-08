@@ -240,12 +240,12 @@ class online:
 
     def hostSendData(socket):
         global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
+        socket.send(f"{str(start)},{str(running)},{int(points['player1'])},{int(points['player2'])},{int(positionPlayer1.y)},{int(directionPlayer1)},{int(positionBall.x)},{int(positionBall.y)},{int(directionBall.x)},{int(directionBall.y)}".encode())
         data = socket.recv(1024).decode('utf-8').split(",")
         start = data[0] == "True"
         running = data[1] == "True"
-        positionPlayer2.y = int(float(data[2]))
-        directionPlayer2 = int(float(data[3]))
+        positionPlayer2.y = int(data[2])
+        directionPlayer2 = int(data[3])
         print(data) #TODO: REMOVE LATER
 
     def client():
@@ -292,13 +292,13 @@ class online:
         running = data[1] == "True"
         points["player1"] = int(data[2])
         points["player2"] = int(data[3])
-        positionPlayer1.y = int(float(data[4]))
+        positionPlayer1.y = int(data[4])
         directionPlayer1 = int(data[5])
-        positionBall.x = int(float(data[6]))
-        positionBall.y = int(float(data[7]))
+        positionBall.x = int(data[6])
+        positionBall.y = int(data[7])
         directionBall.x = int(data[8])
         directionBall.y = int(data[9])
-        socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
+        socket.send(f"{str(start)},{str(running)},{int(positionPlayer2.y)},{int(directionPlayer2)}".encode())
         print(data) #TODO: REMOVE LATER
 
 stringToBoolean ={"n": False, "y": True}
