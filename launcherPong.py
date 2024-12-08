@@ -264,7 +264,8 @@ class online:
         while gameThread.is_alive():
             with lock:
                 socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
-                data = socket.recv(1024).decode('utf-8').split(",")
+                data = socket.recv(1024)
+                data = data.decode('utf-8').split(",")
                 positionPlayer2.y = int(float(data[2]))
                 directionPlayer2 = int(float(data[3]))
             sleep(1/60)
@@ -311,7 +312,8 @@ class online:
         from time import sleep
         while gameThread.is_alive():
             with lock:
-                data = socket.recv(1024).decode('utf-8').split(",")
+                data = socket.recv(1024)
+                data = data.decode('utf-8').split(",")
                 start = data[0] == "True"
                 running = data[1] == "True"
                 points["player1"] = int(float(data[2]))
@@ -339,9 +341,9 @@ while __name__ == "__main__":
         elif isOnline == "n":
             launcher()
     else:
-        width = int(input("Enter the width: "))
-        height = int(input("Enter the height: "))
-        speed = int(input("Enter the speed: "))
+        width = int(input("Enter the width (Default 768): "))
+        height = int(input("Enter the height (Default 512): "))
+        speed = int(input("Enter the speed (Default 5): "))
         if isOnline:
             online.host(width, height, speed)
         else:
