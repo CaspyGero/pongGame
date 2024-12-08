@@ -1,7 +1,7 @@
 def gamePong(width, height, speed):
     import pygame
     from os import path
-    global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+    global lock, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
     pygame.init()
     pygame.display.set_caption("Pong")
     logoPong = pygame.image.load(path.dirname(__file__) + "/logoPong.png")
@@ -10,12 +10,13 @@ def gamePong(width, height, speed):
     clock = pygame.time.Clock()
     #Define variables
     margin = {"up" : 30, "right" : 20, "down" : 20, "left" : 20}
-    directionPlayer1 = speed
-    directionPlayer2 = -speed
-    directionBall = pygame.Vector2(speed * (3/5), speed * (3/5))
-    positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
-    positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
-    positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    with lock:
+        directionPlayer1 = speed
+        directionPlayer2 = -speed
+        directionBall = pygame.Vector2(speed * (3/5), speed * (3/5))
+        positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
+        positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
+        positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     font = pygame.font.Font(None, 50)
     pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
     startText = font.render("Press space to start", 1, "white")
@@ -28,17 +29,19 @@ def gamePong(width, height, speed):
     #Principal function
     while running:
         #Reset variables
-        positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
-        positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
-        positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+        with lock:
+            positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
+            positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
+            positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
         #Detect actions
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                continue
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    start = True
+            with lock:
+                if event.type == pygame.QUIT:
+                    running = False
+                    continue
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        start = True
         #Draw sprites
         screen.fill("black")
         pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
@@ -58,43 +61,45 @@ def gamePong(width, height, speed):
         while start:
             #Detect actions
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    start = False
-                    running = False
-                    continue
-                if event.type == pygame.KEYDOWN:
-                    #Player 1
-                    if event.key == pygame.K_w:
-                        directionPlayer1 = -speed
-                    if event.key == pygame.K_s:
-                        directionPlayer1 = speed
-                    #Player 2
-                    if event.key == pygame.K_UP:
-                        directionPlayer2 = -speed
-                    if event.key == pygame.K_DOWN:
-                        directionPlayer2 = speed
+                with lock:
+                    if event.type == pygame.QUIT:
+                        start = False
+                        running = False
+                        continue
+                    if event.type == pygame.KEYDOWN:
+                        #Player 1
+                        if event.key == pygame.K_w:
+                            directionPlayer1 = -speed
+                        if event.key == pygame.K_s:
+                            directionPlayer1 = speed
+                        #Player 2
+                        if event.key == pygame.K_UP:
+                            directionPlayer2 = -speed
+                        if event.key == pygame.K_DOWN:
+                            directionPlayer2 = speed
             #Mobile objects coordinates
-            positionBall.x += directionBall.x
-            positionBall.y += directionBall.y
-            if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
-                directionBall.y *= -1
-            positionPlayer1.y += directionPlayer1
-            positionPlayer2.y += directionPlayer2
-            if positionPlayer1.y < margin["up"]:
-                positionPlayer1.y = margin["up"]
-            elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
-                positionPlayer1.y = screen.get_height() - margin["down"] - 64
-            if positionPlayer2.y < margin["up"]:
-                positionPlayer2.y = margin["up"]
-            elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
-                positionPlayer2.y = screen.get_height() - margin["down"] - 64
-            #Define if someone wins points
-            if positionBall.x < margin["left"] + 10:
-                points["player2"] += 1
-                start = False
-            elif positionBall.x > screen.get_width() - margin["right"] - 10:
-                points["player1"] += 1
-                start = False
+            with lock:
+                positionBall.x += directionBall.x
+                positionBall.y += directionBall.y
+                if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
+                    directionBall.y *= -1
+                positionPlayer1.y += directionPlayer1
+                positionPlayer2.y += directionPlayer2
+                if positionPlayer1.y < margin["up"]:
+                    positionPlayer1.y = margin["up"]
+                elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
+                    positionPlayer1.y = screen.get_height() - margin["down"] - 64
+                if positionPlayer2.y < margin["up"]:
+                    positionPlayer2.y = margin["up"]
+                elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
+                    positionPlayer2.y = screen.get_height() - margin["down"] - 64
+                #Define if someone wins points
+                if positionBall.x < margin["left"] + 10:
+                    points["player2"] += 1
+                    start = False
+                elif positionBall.x > screen.get_width() - margin["right"] - 10:
+                    points["player1"] += 1
+                    start = False
             #Draw sprites
             screen.fill("black")
             pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
@@ -108,7 +113,8 @@ def gamePong(width, height, speed):
             ball = pygame.draw.circle(screen, "white", positionBall, 10)
             #Collitions
             if ball.colliderect(player1) or ball.colliderect(player2):
-                directionBall.x *= -1
+                with lock:
+                    directionBall.x *= -1
             #Update screen
             pygame.display.flip()
             clock.tick(60)    
@@ -186,9 +192,11 @@ def launcher():
 
 class online:
     def baseVariables():
-        global start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        global lock, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         from pygame import Vector2
+        from threading import Lock
         #Standart values
+        lock = Lock()
         speed = 5
         margin = {"left":5, "right": 5}
         height, width = 500, 500
@@ -239,15 +247,15 @@ class online:
         print("End of connection!")
 
     def hostSendData(socket):
-        global gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         while gameThread.is_alive():
-            socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
-            data = socket.recv(1024).decode('utf-8').split(",")
-            start = data[0] == "True"
-            running = data[1] == "True"
-            positionPlayer2.y = int(float(data[2]))
-            directionPlayer2 = int(float(data[3]))
-            print(data) #TODO: REMOVE LATER
+            with lock:
+                socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
+                data = socket.recv(1024).decode('utf-8').split(",")
+                start = data[0] == "True"
+                running = data[1] == "True"
+                positionPlayer2.y = int(float(data[2]))
+                directionPlayer2 = int(float(data[3]))
 
     def client():
         import threading
@@ -287,21 +295,21 @@ class online:
         print("End of connection!")
 
     def clientSendData(socket):
-        global gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
         while gameThread.is_alive():
-            data = socket.recv(1024).decode('utf-8').split(",")
-            start = data[0] == "True"
-            running = data[1] == "True"
-            points["player1"] = int(float(data[2]))
-            points["player2"] = int(float(data[3]))
-            positionPlayer1.y = int(float(data[4]))
-            directionPlayer1 = int(float(data[5]))
-            positionBall.x = int(float(data[6]))
-            positionBall.y = int(float(data[7]))
-            directionBall.x = int(float(data[8]))
-            directionBall.y = int(float(data[9]))
-            socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
-            print(data) #TODO: REMOVE LATER
+            with lock:
+                data = socket.recv(1024).decode('utf-8').split(",")
+                start = data[0] == "True"
+                running = data[1] == "True"
+                points["player1"] = int(float(data[2]))
+                points["player2"] = int(float(data[3]))
+                positionPlayer1.y = int(float(data[4]))
+                directionPlayer1 = int(float(data[5]))
+                positionBall.x = int(float(data[6]))
+                positionBall.y = int(float(data[7]))
+                directionBall.x = int(float(data[8]))
+                directionBall.y = int(float(data[9]))
+                socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
