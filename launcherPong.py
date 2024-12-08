@@ -61,43 +61,55 @@ def gamePong(width, height, speed):
         while start:
             #Detect actions
             for event in pygame.event.get():
-                with lock:
-                    if event.type == pygame.QUIT:
+                
+                if event.type == pygame.QUIT:
+                    with lock:
                         start = False
                         running = False
                         continue
-                    if event.type == pygame.KEYDOWN:
-                        #Player 1
-                        if event.key == pygame.K_w:
+                if event.type == pygame.KEYDOWN:
+                    #Player 1
+                    if event.key == pygame.K_w:
+                        with lock:
                             directionPlayer1 = -speed
-                        if event.key == pygame.K_s:
+                    if event.key == pygame.K_s:
+                        with lock:
                             directionPlayer1 = speed
-                        #Player 2
-                        if event.key == pygame.K_UP:
+                    #Player 2
+                    if event.key == pygame.K_UP:
+                        with lock:
                             directionPlayer2 = -speed
-                        if event.key == pygame.K_DOWN:
+                    if event.key == pygame.K_DOWN:
+                        with lock:
                             directionPlayer2 = speed
             #Mobile objects coordinates
             with lock:
                 positionBall.x += directionBall.x
                 positionBall.y += directionBall.y
-                if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
-                    directionBall.y *= -1
                 positionPlayer1.y += directionPlayer1
                 positionPlayer2.y += directionPlayer2
-                if positionPlayer1.y < margin["up"]:
+            if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
+                with lock:
+                    directionBall.y *= -1
+            if positionPlayer1.y < margin["up"]:
+                with lock:
                     positionPlayer1.y = margin["up"]
-                elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
+            elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
+                with lock:
                     positionPlayer1.y = screen.get_height() - margin["down"] - 64
-                if positionPlayer2.y < margin["up"]:
+            if positionPlayer2.y < margin["up"]:
+                with lock:
                     positionPlayer2.y = margin["up"]
-                elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
+            elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
+                with lock:
                     positionPlayer2.y = screen.get_height() - margin["down"] - 64
-                #Define if someone wins points
-                if positionBall.x < margin["left"] + 10:
+            #Define if someone wins points
+            if positionBall.x < margin["left"] + 10:
+                with lock:
                     points["player2"] += 1
                     start = False
-                elif positionBall.x > screen.get_width() - margin["right"] - 10:
+            elif positionBall.x > screen.get_width() - margin["right"] - 10:
+                with lock:
                     points["player1"] += 1
                     start = False
             #Draw sprites
@@ -248,14 +260,14 @@ class online:
 
     def hostSendData(socket):
         global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        from time import sleep
         while gameThread.is_alive():
             with lock:
                 socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
                 data = socket.recv(1024).decode('utf-8').split(",")
-                start = data[0] == "True"
-                running = data[1] == "True"
                 positionPlayer2.y = int(float(data[2]))
                 directionPlayer2 = int(float(data[3]))
+            sleep(1/60)
 
     def client():
         import threading
@@ -296,6 +308,7 @@ class online:
 
     def clientSendData(socket):
         global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
+        from time import sleep
         while gameThread.is_alive():
             with lock:
                 data = socket.recv(1024).decode('utf-8').split(",")
@@ -309,7 +322,8 @@ class online:
                 positionBall.y = int(float(data[7]))
                 directionBall.x = int(float(data[8]))
                 directionBall.y = int(float(data[9]))
-                socket.send(f"{str(start)},{str(running)},{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
+                socket.send(f"{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
+            sleep(1/60)
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
