@@ -266,6 +266,7 @@ class online:
                 socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
                 data = socket.recv(1024)
                 data = data.decode('utf-8').split(",")
+                print(data)#TODO: DELETE AFTER
                 positionPlayer2.y = int(float(data[2]))
                 directionPlayer2 = int(float(data[3]))
             sleep(1/60)
@@ -314,6 +315,7 @@ class online:
             with lock:
                 data = socket.recv(1024)
                 data = data.decode('utf-8').split(",")
+                print(data)#TODO: DELETE AFTER
                 start = data[0] == "True"
                 running = data[1] == "True"
                 points["player1"] = int(float(data[2]))
