@@ -1,1 +1,1 @@
-This is a very simple pong game, it requires pygame.
+A pong game that can be multiplayer, is uses the pygame library, and the tkinter library is optional

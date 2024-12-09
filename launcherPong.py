@@ -329,7 +329,6 @@ class online:
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
-    hasTk = stringToBoolean[input("Is tkinter installer (Y/n)? ").lower()]
     isOnline = stringToBoolean[input("Online (Y/n)? ").lower()]
     try:
         import tkinter
@@ -346,6 +345,10 @@ while __name__ == "__main__":
         height = int(input("Enter the height (Default 512): "))
         speed = int(input("Enter the speed (Default 5): "))
         if isOnline:
-            online.host(width, height, speed)
+            hostOrClient = input("Host or client (H/c)? ").lower()
+            if hostOrClient == "h":
+                online.host(width, height, speed)
+            elif hostOrClient == "c":
+                online.client(width, height, speed)
         else:
             gamePong(width, height, speed)
