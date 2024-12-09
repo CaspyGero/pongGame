@@ -266,8 +266,8 @@ class online:
                 socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
                 data = socket.recv(1024)
                 data = data.decode('utf-8').split(",")
-                positionPlayer2.y = int(float(data[1]))
-                directionPlayer2 = int(float(data[2]))
+                positionPlayer2.y = int(float(data[0]))
+                directionPlayer2 = int(float(data[1]))
             sleep(1/60)
 
     def client():
