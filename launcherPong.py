@@ -331,7 +331,8 @@ stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
     hasTk = stringToBoolean[input("Is tkinter installer (Y/n)? ").lower()]
     isOnline = stringToBoolean[input("Online (Y/n)? ").lower()]
-    if hasTk:
+    try:
+        import tkinter
         if isOnline:
             hostOrClient = input("Host or client (H/c)? ").lower()
             if hostOrClient == "h":
@@ -340,7 +341,7 @@ while __name__ == "__main__":
                 online.client()
         elif isOnline == "n":
             launcher()
-    else:
+    except ImportError:
         width = int(input("Enter the width (Default 768): "))
         height = int(input("Enter the height (Default 512): "))
         speed = int(input("Enter the speed (Default 5): "))
