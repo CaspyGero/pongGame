@@ -59,15 +59,14 @@ def gamePong(width, height, speed):
         pygame.display.flip()
         clock.tick(60)
         while start:
-            #Detect actions
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    with lock:
+            with lock:
+                #Detect actions
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
                         start = False
                         running = False
-                    continue
-                if event.type == pygame.KEYDOWN:
-                    with lock:
+                        continue
+                    if event.type == pygame.KEYDOWN:
                         #Player 1
                         if event.key == pygame.K_w:
                             directionPlayer1 = -speed
@@ -78,13 +77,11 @@ def gamePong(width, height, speed):
                             directionPlayer2 = -speed
                         if event.key == pygame.K_DOWN:
                             directionPlayer2 = speed
-            #Mobile objects coordinates
-            with lock:
+                #Mobile objects coordinates
                 positionBall.x += directionBall.x
                 positionBall.y += directionBall.y
                 positionPlayer1.y += directionPlayer1
                 positionPlayer2.y += directionPlayer2
-            with lock:
                 if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
                     directionBall.y *= -1
                 if positionPlayer1.y < margin["up"]:
@@ -102,20 +99,19 @@ def gamePong(width, height, speed):
                 elif positionBall.x > screen.get_width() - margin["right"] - 10:
                     points["player1"] += 1
                     start = False
-            #Draw sprites
-            screen.fill("black")
-            pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
-            screen.blit(pointsText, centerPoints)
-            pygame.draw.line(screen, "white", (margin["left"], margin["up"]), (screen.get_width() - margin["right"], margin["up"]), 2)
-            pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], margin["up"]), (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), 2)
-            pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), (margin["left"], screen.get_height() - margin["down"]), 2)
-            pygame.draw.line(screen, "white", (margin["left"], screen.get_height() - margin["down"]), (margin["left"], margin["up"]), 2)
-            player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
-            player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
-            ball = pygame.draw.circle(screen, "white", positionBall, 10)
-            #Collitions
-            if ball.colliderect(player1) or ball.colliderect(player2):
-                with lock:
+                #Draw sprites
+                screen.fill("black")
+                pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
+                screen.blit(pointsText, centerPoints)
+                pygame.draw.line(screen, "white", (margin["left"], margin["up"]), (screen.get_width() - margin["right"], margin["up"]), 2)
+                pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], margin["up"]), (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), 2)
+                pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), (margin["left"], screen.get_height() - margin["down"]), 2)
+                pygame.draw.line(screen, "white", (margin["left"], screen.get_height() - margin["down"]), (margin["left"], margin["up"]), 2)
+                player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
+                player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
+                ball = pygame.draw.circle(screen, "white", positionBall, 10)
+                #Collitions
+                if ball.colliderect(player1) or ball.colliderect(player2):
                     directionBall.x *= -1
             #Update screen
             pygame.display.flip()
