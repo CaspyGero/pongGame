@@ -53,9 +53,9 @@ def gamePong(width, height, speed):
             player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
             player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
             ball = pygame.draw.circle(screen, "white", positionBall, 10)
-            #Update screen
-            pygame.display.flip()
-            clock.tick(60)
+        #Update screen
+        pygame.display.flip()
+        clock.tick(60)
         while start:
             with lock:
                 #Detect actions
