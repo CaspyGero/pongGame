@@ -240,7 +240,6 @@ class online:
 
     def hostSendData(socket):
         global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        from time import sleep
         while gameThread.is_alive():
             with lock:
                 socket.send(f"{str(start)},{str(running)},{str(points['player1'])},{str(points['player2'])},{str(positionPlayer1.y)},{str(directionPlayer1)},{str(positionBall.x)},{str(positionBall.y)},{str(directionBall.x)},{str(directionBall.y)}".encode())
@@ -248,7 +247,6 @@ class online:
                 data = data.decode('utf-8').split(",")
                 positionPlayer2.y = int(float(data[0]))
                 directionPlayer2 = int(float(data[1]))
-            sleep(1/60)
 
     def client():
         import threading
@@ -289,7 +287,6 @@ class online:
 
     def clientSendData(socket):
         global lock, gameThread, start, running, points, positionPlayer1, directionPlayer1, positionPlayer2, directionPlayer2, positionBall, directionBall
-        from time import sleep
         while gameThread.is_alive():
             with lock:
                 data = socket.recv(1024)
@@ -305,7 +302,6 @@ class online:
                 directionBall.x = int(float(data[8]))
                 directionBall.y = int(float(data[9]))
                 socket.send(f"{str(positionPlayer2.y)},{str(directionPlayer2)}".encode())
-            sleep(1/60)
 
 stringToBoolean ={"n": False, "y": True}
 while __name__ == "__main__":
@@ -322,15 +318,18 @@ while __name__ == "__main__":
             online.baseVariables()
             launcher()
     except ImportError:
-        width = int(input("Enter the width (Default 768): "))
-        height = int(input("Enter the height (Default 512): "))
-        speed = int(input("Enter the speed (Default 5): "))
         if isOnline:
             hostOrClient = input("Host or client (H/c)? ").lower()
             if hostOrClient == "h":
+                width = int(input("Enter the width (Default 768): "))
+                height = int(input("Enter the height (Default 512): "))
+                speed = int(input("Enter the speed (Default 5): "))
                 online.host(width, height, speed)
             elif hostOrClient == "c":
-                online.client(width, height, speed)
+                online.client()
         else:
+            width = int(input("Enter the width (Default 768): "))
+            height = int(input("Enter the height (Default 512): "))
+            speed = int(input("Enter the speed (Default 5): "))
             online.baseVariables()
             gamePong(width, height, speed)
