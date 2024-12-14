@@ -28,24 +28,93 @@ def gamePong(width, height, speed):
     centerStart.centery = screen.get_height() // 2 - 30
     #Principal function
     while running:
+        #Reset variables
         with lock:
-            #Reset variables
             positionPlayer1 = pygame.Vector2(margin["left"] + 25, screen.get_height() / 2)
             positionPlayer2 = pygame.Vector2(screen.get_width() - margin["right"] - 16 - 25, screen.get_height() / 2)
             positionBall = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+        #Detect actions
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                with lock:
+                    running = False
+                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    with lock:
+                        start = True
+        #Draw sprites
+        screen.fill("black")
+        pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
+        screen.blit(pointsText, centerPoints)
+        screen.blit(startText, centerStart)
+        pygame.draw.line(screen, "white", (margin["left"], margin["up"]), (screen.get_width() - margin["right"], margin["up"]), 2)
+        pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], margin["up"]), (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), 2)
+        pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), (margin["left"], screen.get_height() - margin["down"]), 2)
+        pygame.draw.line(screen, "white", (margin["left"], screen.get_height() - margin["down"]), (margin["left"], margin["up"]), 2)
+        player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
+        player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
+        ball = pygame.draw.circle(screen, "white", positionBall, 10)
+        #Update screen
+        pygame.display.flip()
+        clock.tick(60)
+        while start:
             #Detect actions
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    with lock:
+                        start = False
+                        running = False
                     continue
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        start = True
+                    #Player 1
+                    if event.key == pygame.K_w:
+                        with lock:
+                            directionPlayer1 = -speed
+                    if event.key == pygame.K_s:
+                        with lock:
+                            directionPlayer1 = speed
+                    #Player 2
+                    if event.key == pygame.K_UP:
+                        with lock:
+                            directionPlayer2 = -speed
+                    if event.key == pygame.K_DOWN:
+                        with lock:
+                            directionPlayer2 = speed
+            #Mobile objects coordinates
+            with lock:
+                positionBall.x += directionBall.x
+                positionBall.y += directionBall.y
+                positionPlayer1.y += directionPlayer1
+                positionPlayer2.y += directionPlayer2
+            if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
+                with lock:
+                    directionBall.y *= -1
+            if positionPlayer1.y < margin["up"]:
+                with lock:
+                    positionPlayer1.y = margin["up"]
+            elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
+                with lock:
+                    positionPlayer1.y = screen.get_height() - margin["down"] - 64
+            if positionPlayer2.y < margin["up"]:
+                with lock:
+                    positionPlayer2.y = margin["up"]
+            elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
+                with lock:
+                    positionPlayer2.y = screen.get_height() - margin["down"] - 64
+            #Define if someone wins points
+            if positionBall.x < margin["left"] + 10:
+                with lock:
+                    points["player2"] += 1
+                    start = False
+            elif positionBall.x > screen.get_width() - margin["right"] - 10:
+                with lock:
+                    points["player1"] += 1
+                    start = False
             #Draw sprites
             screen.fill("black")
             pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
             screen.blit(pointsText, centerPoints)
-            screen.blit(startText, centerStart)
             pygame.draw.line(screen, "white", (margin["left"], margin["up"]), (screen.get_width() - margin["right"], margin["up"]), 2)
             pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], margin["up"]), (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), 2)
             pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), (margin["left"], screen.get_height() - margin["down"]), 2)
@@ -53,67 +122,13 @@ def gamePong(width, height, speed):
             player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
             player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
             ball = pygame.draw.circle(screen, "white", positionBall, 10)
-        #Update screen
-        pygame.display.flip()
-        clock.tick(60)
-        while start:
-            with lock:
-                #Detect actions
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        start = False
-                        running = False
-                        continue
-                    if event.type == pygame.KEYDOWN:
-                        #Player 1
-                        if event.key == pygame.K_w:
-                            directionPlayer1 = -speed
-                        if event.key == pygame.K_s:
-                            directionPlayer1 = speed
-                        #Player 2
-                        if event.key == pygame.K_UP:
-                            directionPlayer2 = -speed
-                        if event.key == pygame.K_DOWN:
-                            directionPlayer2 = speed
-                #Mobile objects coordinates
-                positionBall.x += directionBall.x
-                positionBall.y += directionBall.y
-                positionPlayer1.y += directionPlayer1
-                positionPlayer2.y += directionPlayer2
-                if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
-                    directionBall.y *= -1
-                if positionPlayer1.y < margin["up"]:
-                    positionPlayer1.y = margin["up"]
-                elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
-                    positionPlayer1.y = screen.get_height() - margin["down"] - 64
-                if positionPlayer2.y < margin["up"]:
-                    positionPlayer2.y = margin["up"]
-                elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
-                    positionPlayer2.y = screen.get_height() - margin["down"] - 64
-                #Define if someone wins points
-                if positionBall.x < margin["left"] + 10:
-                    points["player2"] += 1
-                    start = False
-                elif positionBall.x > screen.get_width() - margin["right"] - 10:
-                    points["player1"] += 1
-                    start = False
-                #Draw sprites
-                screen.fill("black")
-                pointsText = font.render((str(points["player1"]) + " - " + str(points["player2"])), 1, "white")
-                screen.blit(pointsText, centerPoints)
-                pygame.draw.line(screen, "white", (margin["left"], margin["up"]), (screen.get_width() - margin["right"], margin["up"]), 2)
-                pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], margin["up"]), (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), 2)
-                pygame.draw.line(screen, "white", (screen.get_width() - margin["right"], screen.get_height() - margin["down"]), (margin["left"], screen.get_height() - margin["down"]), 2)
-                pygame.draw.line(screen, "white", (margin["left"], screen.get_height() - margin["down"]), (margin["left"], margin["up"]), 2)
-                player1 = pygame.draw.rect(screen, "white", (positionPlayer1.x, positionPlayer1.y, 16, 64))
-                player2 = pygame.draw.rect(screen, "white", (positionPlayer2.x, positionPlayer2.y, 16, 64))
-                ball = pygame.draw.circle(screen, "white", positionBall, 10)
-                #Collitions
-                if ball.colliderect(player1) or ball.colliderect(player2):
+            #Collitions
+            if ball.colliderect(player1) or ball.colliderect(player2):
+                with lock:
                     directionBall.x *= -1
-                #Update screen
-                pygame.display.flip()
-                clock.tick(60)    
+            #Update screen
+            pygame.display.flip()
+            clock.tick(60)
     pygame.quit()
 
 def startGame():
