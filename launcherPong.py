@@ -67,19 +67,16 @@ def gamePong(width, height, speed):
                         running = False
                     continue
                 if event.type == pygame.KEYDOWN:
-                    #Player 1
-                    if event.key == pygame.K_w:
-                        with lock:
+                    with lock:
+                        #Player 1
+                        if event.key == pygame.K_w:
                             directionPlayer1 = -speed
-                    if event.key == pygame.K_s:
-                        with lock:
+                        if event.key == pygame.K_s:
                             directionPlayer1 = speed
-                    #Player 2
-                    if event.key == pygame.K_UP:
-                        with lock:
+                        #Player 2
+                        if event.key == pygame.K_UP:
                             directionPlayer2 = -speed
-                    if event.key == pygame.K_DOWN:
-                        with lock:
+                        if event.key == pygame.K_DOWN:
                             directionPlayer2 = speed
             #Mobile objects coordinates
             with lock:
@@ -87,28 +84,22 @@ def gamePong(width, height, speed):
                 positionBall.y += directionBall.y
                 positionPlayer1.y += directionPlayer1
                 positionPlayer2.y += directionPlayer2
-            if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
-                with lock:
+            with lock:
+                if positionBall.y < margin["up"] + 10 or positionBall.y > screen.get_height() - margin["down"] - 10:
                     directionBall.y *= -1
-            if positionPlayer1.y < margin["up"]:
-                with lock:
+                if positionPlayer1.y < margin["up"]:
                     positionPlayer1.y = margin["up"]
-            elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
-                with lock:
+                elif positionPlayer1.y > screen.get_height() - margin["down"] - 64:
                     positionPlayer1.y = screen.get_height() - margin["down"] - 64
-            if positionPlayer2.y < margin["up"]:
-                with lock:
+                if positionPlayer2.y < margin["up"]:
                     positionPlayer2.y = margin["up"]
-            elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
-                with lock:
+                elif positionPlayer2.y > screen.get_height() - margin["down"] - 64:
                     positionPlayer2.y = screen.get_height() - margin["down"] - 64
-            #Define if someone wins points
-            if positionBall.x < margin["left"] + 10:
-                with lock:
+                #Define if someone wins points
+                if positionBall.x < margin["left"] + 10:
                     points["player2"] += 1
                     start = False
-            elif positionBall.x > screen.get_width() - margin["right"] - 10:
-                with lock:
+                elif positionBall.x > screen.get_width() - margin["right"] - 10:
                     points["player1"] += 1
                     start = False
             #Draw sprites
